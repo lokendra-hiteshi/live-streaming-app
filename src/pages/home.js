@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import paths from "../paths";
 
@@ -19,6 +19,7 @@ const Home = () => {
         navigate(`${paths.audioPage}?source=${input}`);
       } else {
         navigate(`${paths.videoPage}?source=${input}`);
+        // navigate(`${paths.audioPage}?source=${input}`);
       }
     }
   };
@@ -28,6 +29,7 @@ const Home = () => {
       <div className="lg:mx-40 md:mx-30 sm:mx-20  lg:flex lg:items-center lg:justify-center md:gap-x-3">
         <div>
           <img
+            alt=""
             src="https://c4.wallpaperflare.com/wallpaper/114/207/695/video-game-fortnite-marshmello-music-hd-wallpaper-preview.jpg"
             className="rounded-md"
           />
