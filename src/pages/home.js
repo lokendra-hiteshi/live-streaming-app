@@ -9,17 +9,23 @@ const Home = () => {
     e.preventDefault();
     const input = e.target.elements.link.value;
     if (input) {
-      if (
-        input.endsWith(".mp3") ||
-        input.endsWith(".aac") ||
-        input.endsWith(".ogg") ||
-        input.endsWith(".wav") ||
-        input.endsWith(".flac")
-      ) {
-        navigate(`${paths.audioPage}?source=${input}`);
-      } else {
+      // if (
+      //   input.endsWith(".mp3") ||
+      //   input.endsWith(".aac") ||
+      //   input.endsWith(".ogg") ||
+      //   input.endsWith(".wav") ||
+      //   input.endsWith(".flac")
+      // ) {
+      //   navigate(`${paths.audioPage}?source=${input}`);
+      // } else {
+      //   // navigate(`${paths.videoPage}?source=${input}`);
+      //   navigate(`${paths.audioPage}?source=${input}`);
+      // }
+
+      if (input.endsWith(".m3u8")) {
         navigate(`${paths.videoPage}?source=${input}`);
-        // navigate(`${paths.audioPage}?source=${input}`);
+      } else {
+        navigate(`${paths.audioPage}?source=${input}`);
       }
     }
   };
