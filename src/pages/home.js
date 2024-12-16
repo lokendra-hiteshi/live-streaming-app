@@ -1,34 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import paths from "../paths";
+import { useMedia } from "../context/mediaContext";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { setMediaSource } = useMedia();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const input = e.target.elements.link.value;
+    setMediaSource(input);
     if (input) {
-      // if (
-      //   input.endsWith(".mp3") ||
-      //   input.endsWith(".aac") ||
-      //   input.endsWith(".ogg") ||
-      //   input.endsWith(".wav") ||
-      //   input.endsWith(".flac")
-      // ) {
-      //   navigate(`${paths.audioPage}?source=${input}`);
-      // } else {
-      //   // navigate(`${paths.videoPage}?source=${input}`);
-      //   navigate(`${paths.audioPage}?source=${input}`);
-      // }
-
-      if (input.endsWith(".m3u8")) {
-        navigate(`${paths.videoPage}?source=${input}`);
+      if (input.endsWith(".m3u8") || input.endsWith(".mp4")) {
+        navigate(`${paths.videoPage}`);
       } else {
-        navigate(`${paths.audioPage}?source=${input}`);
+        navigate(`${paths.audioPage}`);
       }
     }
   };
+
+  useEffect(() => {
+    setMediaSource("");
+    localStorage.removeItem("mediaSource");
+  }, [setMediaSource]);
 
   return (
     <div className="relative  px-6 pt-14 lg:px-8">
@@ -43,7 +38,7 @@ const Home = () => {
         <div className="mx-auto max-w-2xl py-16 lg:py-56">
           <div>
             <h1 className="text-left text-3xl font-semibold text-gray-900 sm:text-3xl md:text-4xl">
-              Enter URL here and You can watch the video and Listen the Audio.
+              Enter a URL to watch the video and listen to the audio.
             </h1>
 
             <div className="mt-10 w-100 ">

@@ -1,6 +1,6 @@
 import React from "react";
 
-const ProfileCircle = () => {
+const Profile = () => {
   return (
     <div className="flex justify-center items-center h-[300px] max-w-[300px] overflow-hidden">
       <div className="relative flex justify-center items-center w-[300px] h-[300px] m-auto overflow-hidden">
@@ -10,9 +10,8 @@ const ProfileCircle = () => {
 
         <div className="absolute w-[220px] h-[220px] rounded-full bg-[#ffd6e5] translate-x-[-15px] translate-y-[30px]"></div>
 
-        <div className="absolute w-[230px] h-[230px] rounded-full bg-[#FCB13D]  translate-x-[-22px]  translate-y-[0px]"></div>
-
         <div className="absolute w-[240px] h-[240px] rounded-full bg-[#1F8380] translate-x-[20px] translate-y-[-10px]"></div>
+        <div className="absolute w-[230px] h-[230px] rounded-full bg-[#FCB13D]  translate-x-[-22px]  translate-y-[0px]"></div>
 
         <div className="absolute  w-[240px] h-[240px] rounded-full bg-[#D6155B] translate-x-[10px] translate-y-[25px]"></div>
 
@@ -30,4 +29,4 @@ const ProfileCircle = () => {
   );
 };
 
-export default ProfileCircle;
+export default Profile;
