@@ -19,14 +19,13 @@ const AudioPlayer = () => {
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const hlsRef = useRef(null);
-  console.log("mediaSource", mediaSource);
 
   useEffect(() => {
     if (mediaSource) {
       setIsHls(mediaSource.includes(".m3u8"));
       setIsAudio(mediaSource.match(/\.(mp3|wav|ogg)$/i));
     } else navigate(paths.home);
-  }, [mediaSource]);
+  }, [mediaSource, navigate]);
 
   useEffect(() => {
     if (hlsRef.current) {

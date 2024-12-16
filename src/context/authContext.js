@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   const login = (email, password) => {
-    if (email === "admin@admin.com" && password === "password123") {
+    if (email === "admin@gmail.com" && password === "password123") {
       setIsAuthenticated(true);
       localStorage.setItem("authToken", "your-auth-token");
       navigate(paths.home);

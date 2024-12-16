@@ -13,13 +13,12 @@ const VideoPlayer = () => {
   const navigate = useNavigate();
 
   const { mediaSource } = useMedia();
-  console.log("mediaSource", mediaSource);
 
   useEffect(() => {
     if (mediaSource) {
       setIsHls(mediaSource.endsWith(".m3u8"));
     } else navigate(paths.home);
-  }, [mediaSource]);
+  }, [mediaSource, navigate]);
 
   useEffect(() => {
     const mediaElement = mediaRef.current;
