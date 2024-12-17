@@ -184,6 +184,7 @@ const AudioPlayer = () => {
                 <div className="mx-2">
                   {isPlaying ? (
                     <img
+                      alt=""
                       src="https://cdn.pixabay.com/animation/2024/06/04/16/39/16-39-28-355_512.gif"
                       className="w-12 h-12"
                     />
