@@ -1,10 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
+import { useNavigate } from "react-router-dom";
+import paths from "../paths";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isLogedIn = localStorage.getItem("authToken");
+    if (isLogedIn) {
+      navigate(paths.home);
+    }
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();

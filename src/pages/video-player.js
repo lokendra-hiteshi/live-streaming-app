@@ -8,17 +8,15 @@ import paths from "../paths";
 const VideoPlayer = () => {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
-  const [isHls, setIsHls] = useState(false);
+  const { mediaSource } = useMedia();
   const navigate = useNavigate();
+
+  const [isHls, setIsHls] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState(1);
   const [qualityOptions, setQualityOptions] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
-  const [settingsType, setSettingsType] = useState(null);
-
-  const { mediaSource } = useMedia();
 
   useEffect(() => {
     if (mediaSource) {
@@ -36,7 +34,9 @@ const VideoPlayer = () => {
         hls.attachMedia(mediaElement);
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log("hls", hls);
           const qualities = hls.levels.map((level) => level.height);
+          console.log(qualities);
           setQualityOptions(["Auto", ...qualities]);
         });
 
@@ -53,6 +53,8 @@ const VideoPlayer = () => {
       } else {
         console.error("HLS not supported on this browser.");
       }
+    } else {
+      mediaElement.src = mediaSource;
     }
 
     mediaElement.addEventListener("timeupdate", handleTimeUpdate);
@@ -101,7 +103,6 @@ const VideoPlayer = () => {
 
   const handleSpeedChange = (speed) => {
     const video = videoRef.current;
-    setPlaybackRate(speed);
     video.playbackRate = speed;
   };
 
@@ -120,11 +121,7 @@ const VideoPlayer = () => {
   const handleProgressChange = (e) => {
     const video = videoRef.current;
     video.currentTime = parseFloat(e.target.value);
-  };
-
-  const toggleSettings = (type) => {
-    setShowSettings((prev) => (settingsType === type ? !prev : true));
-    setSettingsType(type);
+    setCurrentTime(video.currentTime);
   };
 
   return (
@@ -135,7 +132,7 @@ const VideoPlayer = () => {
             You Are Streaming Now
           </h1>
         </div>
-        <div className="container mx-auto p-4" ref={containerRef}>
+        <div className=" p-4" ref={containerRef}>
           <video
             ref={videoRef}
             className="w-full h-auto rounded-md shadow-lg"
@@ -160,6 +157,10 @@ const VideoPlayer = () => {
                   (currentTime / duration) * 100
                 }%, #ffebc4 ${(currentTime / duration) * 100}%)`,
               }}
+            />
+            <div
+              className="bg-yellow-500 h-full"
+              style={{ width: `${(currentTime / duration) * 100}%` }}
             />
           </div>
           <div className="bg-black text-white p-4 flex items-center justify-between shadow-lg">
@@ -245,25 +246,30 @@ const VideoPlayer = () => {
                   <path d="M5.055 7.06C3.805 6.347 2.25 7.25 2.25 8.69v8.122c0 1.44 1.555 2.343 2.805 1.628L12 14.471v2.34c0 1.44 1.555 2.343 2.805 1.628l7.108-4.061c1.26-.72 1.26-2.536 0-3.256l-7.108-4.061C13.555 6.346 12 7.249 12 8.689v2.34L5.055 7.061Z" />
                 </svg>
               </button>
-              <div className="relative">
+              <div className="relative mr-5">
                 <button
                   onClick={() => setShowSettings((prev) => !prev)}
                   className="bg-gray-700 text-white p-2 rounded-md"
                 >
-                  Settings
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-8 h-8"
+                    viewBox="0 -960 960 960"
+                    fill="#fff"
+                  >
+                    <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z" />
+                  </svg>
                 </button>
                 {showSettings && (
                   <div
-                    className="absolute bg-white text-black p-4 rounded shadow-lg z-50"
+                    className="absolute bg-white text-black p-4 mr-10 rounded shadow-lg z-50"
                     style={{
                       bottom: "calc(100% + 8px)",
-                      left: 0,
-                      right: "auto",
                     }}
                   >
                     <div className="mb-2">
                       <h4 className="font-semibold mb-1">Quality</h4>
-                      {qualityOptions.map((q, i) => (
+                      {qualityOptions?.map((q, i) => (
                         <button
                           key={i}
                           className="block w-full text-left p-2 hover:bg-gray-100"
@@ -278,13 +284,13 @@ const VideoPlayer = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">Speed</h4>
-                      {[0.5, 1, 1.5, 2].map((speed) => (
+                      {[0.5, 1, 1.25, 1.5, 1.75, 2]?.map((speed) => (
                         <button
                           key={speed}
                           className="block w-full text-left p-2 hover:bg-gray-100"
                           onClick={() => {
                             handleSpeedChange(speed);
-                            setShowSettings(false); // Close modal after selection
+                            setShowSettings(false);
                           }}
                         >
                           {speed}x

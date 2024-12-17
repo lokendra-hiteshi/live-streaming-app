@@ -168,9 +168,9 @@ const AudioPlayer = () => {
                   background: `linear-gradient(to right, #FCB13D ${
                     (currentTime / duration) * 100
                   }%, #ffebc4 ${(currentTime / duration) * 100}%)`,
-                  appearance: "none",
-                  WebkitAppearance: "none",
-                  height: "1px",
+                  // appearance: "none",
+                  // WebkitAppearance: "none",
+                  // height: "1px",
                 }}
               />
               <div

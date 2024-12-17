@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import { routes } from "./routes";
 import Header from "./components/header";
 import ProtectedContainer from "./components/protected";
@@ -12,6 +17,7 @@ const App = () => {
       <AuthProvider>
         <MediaProvider>
           <Routes>
+            <Route path="/" element={<Navigate to="/home" replace />} />
             {routes.map((route, index) => {
               if (route.protected) {
                 return (

@@ -12,8 +12,33 @@ const Home = () => {
     e.preventDefault();
     const input = e.target.elements.link.value;
     setMediaSource(input);
+
     if (input) {
-      if (input.endsWith(".m3u8") || input.endsWith(".mp4")) {
+      if (input.endsWith(".m3u8")) {
+        try {
+          const response = await fetch(input);
+          const text = await response.text();
+
+          if (text.includes("#EXT-X-STREAM-INF") || text.includes("#EXTINF")) {
+            const hasAudioCodec =
+              text.includes("CODECS=mp4a") || text.includes("CODECS=opus");
+            const hasVideoCodec =
+              text.includes("CODECS=avc1") || text.includes("CODECS=hev1");
+
+            if (hasAudioCodec && hasVideoCodec) {
+              navigate(`${paths.videoPage}`);
+            } else if (hasAudioCodec) {
+              navigate(`${paths.audioPage}`);
+            } else if (hasVideoCodec) {
+              navigate(`${paths.videoPage}`);
+            } else {
+              navigate(`${paths.videoPage}`);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching .m3u8 file:", err);
+        }
+      } else if (input.endsWith(".mp4")) {
         navigate(`${paths.videoPage}`);
       } else {
         navigate(`${paths.audioPage}`);
@@ -27,6 +52,7 @@ const Home = () => {
     setDragActive(false);
 
     const file = e.dataTransfer?.files[0] || e.target.files[0];
+
     if (file) {
       const fileUrl = URL.createObjectURL(file);
       setMediaSource(fileUrl);
