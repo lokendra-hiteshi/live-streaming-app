@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import paths from "../paths";
+import toast from "react-hot-toast";
 
 const AuthContext = createContext();
 
@@ -13,10 +14,14 @@ export const AuthProvider = ({ children }) => {
   const login = (email, password) => {
     if (email === "admin@gmail.com" && password === "password123") {
       setIsAuthenticated(true);
-      localStorage.setItem("authToken", "your-auth-token");
+      localStorage.setItem(
+        "authToken",
+        "gjgngkdskgnskdgnsklgnsdklgnskdgapojwfojreuihdkjnbvdsafnlfvnbvdfbglagnbfweygcfyusfgcfnawmfkcvaw"
+      );
+
       navigate(paths.home);
     } else {
-      alert("Invalid credentials");
+      toast.error("Invalid credentials");
     }
   };
 

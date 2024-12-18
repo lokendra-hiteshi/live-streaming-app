@@ -10,6 +10,7 @@ import Header from "./components/header";
 import ProtectedContainer from "./components/protected";
 import { AuthProvider } from "./context/authContext";
 import { MediaProvider } from "./context/mediaContext";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
@@ -28,6 +29,7 @@ const App = () => {
                       <>
                         <Header />
                         <ProtectedContainer element={<route.component />} />
+                        <Toaster />
                       </>
                     }
                   />
