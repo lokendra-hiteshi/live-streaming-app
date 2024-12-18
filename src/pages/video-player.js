@@ -1,126 +1,158 @@
 import React, { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import Plyr from "plyr";
 import "plyr/dist/plyr.css";
 import { useMedia } from "../context/mediaContext";
 import { useNavigate } from "react-router-dom";
 import paths from "../paths";
+import Player from "../components/player";
 
 const VideoPlayer = () => {
-  const mediaRef = useRef(null);
   const containerRef = useRef(null);
-  const [isHls, setIsHls] = useState(false);
+  const videoRef = useRef(null);
+  const hlsRef = useRef(null);
+  const { mediaSource } = useMedia();
   const navigate = useNavigate();
 
-  const { mediaSource } = useMedia();
-  console.log("mediaSource", mediaSource);
+  const [isHls, setIsHls] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [qualityOptions, setQualityOptions] = useState([]);
 
   useEffect(() => {
     if (mediaSource) {
       setIsHls(mediaSource.endsWith(".m3u8"));
     } else navigate(paths.home);
-  }, [mediaSource]);
+  }, [mediaSource, navigate]);
 
   useEffect(() => {
-    const mediaElement = mediaRef.current;
-    const defaultOptions = {};
+    const mediaElement = videoRef.current;
 
-    let player;
     if (isHls) {
-      if (!Hls.isSupported()) {
-        mediaElement.src = mediaSource;
-        player = new Plyr(mediaElement, defaultOptions);
-      } else {
+      if (Hls.isSupported()) {
         const hls = new Hls();
+        hlsRef.current = hls;
         hls.loadSource(mediaSource);
+        hls.attachMedia(mediaElement);
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          const availableQualities = hls.levels.map((l) => l.height);
-          availableQualities.unshift(0);
-
-          defaultOptions.quality = {
-            default: 0,
-            options: availableQualities,
-            forced: true,
-            onChange: (e) => updateQuality(e),
-          };
-
-          defaultOptions.i18n = {
-            qualityLabel: {
-              0: "Auto",
-            },
-          };
-
-          hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-            const span = containerRef.current.querySelector(
-              ".plyr__menu__container [data-plyr='quality'][value='0'] span"
-            );
-            if (hls.autoLevelEnabled) {
-              span.innerHTML = `AUTO (${hls.levels[data.level].height}p)`;
-            } else {
-              span.innerHTML = `AUTO`;
-            }
-          });
-
-          player = new Plyr(mediaElement, defaultOptions);
+          const qualities = hls.levels.map((level) => level.height);
+          setQualityOptions(["Auto", ...qualities]);
         });
 
-        hls.attachMedia(mediaElement);
-        window.hls = hls;
-      }
-    }
-
-    function updateQuality(newQuality) {
-      if (newQuality === 0) {
-        window.hls.currentLevel = -1;
-      } else {
-        window.hls.levels.forEach((level, levelIndex) => {
-          if (level.height === newQuality) {
-            window.hls.currentLevel = levelIndex;
+        hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+          if (hls.autoLevelEnabled) {
+            setQualityOptions((prev) => [
+              `Auto (${hls.levels[data.level].height}p)`,
+              ...prev.slice(1),
+            ]);
           }
         });
+      } else {
+        console.error("HLS not supported on this browser.");
       }
+    } else {
+      mediaElement.src = mediaSource;
     }
 
+    mediaElement.addEventListener("timeupdate", handleTimeUpdate);
+    mediaElement.addEventListener("loadedmetadata", handleLoadedMetadata);
+    mediaElement.addEventListener("play", () => setIsPlaying(true));
+    mediaElement.addEventListener("pause", () => setIsPlaying(false));
+
     return () => {
-      if (player) {
-        player.destroy();
-      }
-      if (window.hls) {
-        window.hls.destroy();
+      mediaElement.removeEventListener("timeupdate", handleTimeUpdate);
+      mediaElement.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
       }
     };
-  }, [mediaSource, isHls]);
+  }, [isHls, mediaSource]);
+
+  const handleTimeUpdate = () => {
+    const video = videoRef.current;
+    setCurrentTime(video.currentTime);
+  };
+
+  const handleLoadedMetadata = () => {
+    const video = videoRef.current;
+    setDuration(video.duration);
+  };
+
+  const handlePlayPause = () => {
+    const video = videoRef.current;
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play();
+    }
+  };
+
+  const handleSkipForward = () => {
+    const video = videoRef.current;
+    video.currentTime = Math.min(video.currentTime + 10, duration);
+  };
+
+  const handleSkipBack = () => {
+    const video = videoRef.current;
+    video.currentTime = Math.max(video.currentTime - 10, 0);
+  };
+
+  const handleSpeedChange = (speed) => {
+    const video = videoRef.current;
+    video.playbackRate = speed;
+  };
+
+  const handleQualityChange = (quality) => {
+    if (hlsRef.current && quality !== "Auto") {
+      hlsRef.current.levels.forEach((level, index) => {
+        if (level.height === parseInt(quality)) {
+          hlsRef.current.currentLevel = index;
+        }
+      });
+    } else if (hlsRef.current) {
+      hlsRef.current.currentLevel = -1;
+    }
+  };
+
+  const handleProgressChange = (e) => {
+    const video = videoRef.current;
+    video.currentTime = parseFloat(e.target.value);
+    setCurrentTime(video.currentTime);
+  };
 
   return (
-    <div className="relative  px-6 pt-14 lg:px-8">
-      <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-44">
+    <div className="relative px-6 pt-7 lg:px-8  bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500  min-h-screen flex items-center justify-center">
+      <div className="mx-auto max-w-7xl py-24 sm:py-40 lg:py-36">
         <div className="text-center">
-          <h1 className="text-balance text-3xl font-semibold text-gray-900 ">
-            You Ara Streaming Now.
+          <h1 className="text-3xl font-semibold text-gray-900">
+            You Are Streaming Now
           </h1>
         </div>
-        <div className="container mx-auto p-4" ref={containerRef}>
-          {isHls ? (
-            <video
-              ref={mediaRef}
-              className="w-full h-auto rounded-md shadow-lg"
-              controls
-              crossOrigin="anonymous"
-              playsInline
-              poster="https://media.istockphoto.com/id/1005267014/vector/retro-style-condensed-font.jpg?s=1024x1024&w=is&k=20&c=LvYPfz2YzSg1vrd4ECgQlywXGXDYf8VCQ7aq0IyrIMo="
-            ></video>
-          ) : (
-            <video
-              src={mediaSource}
-              className="w-full h-auto rounded-md shadow-lg"
-              controls
-              crossOrigin="anonymous"
-              playsInline
-              poster="https://media.istockphoto.com/id/1005267014/vector/retro-style-condensed-font.jpg?s=1024x1024&w=is&k=20&c=LvYPfz2YzSg1vrd4ECgQlywXGXDYf8VCQ7aq0IyrIMo="
-            ></video>
-          )}
+        <div className="p-4" ref={containerRef}>
+          <video
+            ref={videoRef}
+            className="w-full rounded-md shadow-lg"
+            crossOrigin="anonymous"
+            playsInline
+            poster="https://media.istockphoto.com/id/1005267014/vector/retro-style-condensed-font.jpg?s=1024x1024&w=is&k=20&c=LvYPfz2YzSg1vrd4ECgQlywXGXDYf8VCQ7aq0IyrIMo="
+          />
         </div>
+
+        <Player
+          handleSkipBack={handleSkipBack}
+          handlePlayPause={handlePlayPause}
+          handleProgressChange={handleProgressChange}
+          handleSkipForward={handleSkipForward}
+          duration={duration}
+          currentTime={currentTime}
+          handleQualityChange={handleQualityChange}
+          handleSpeedChange={handleSpeedChange}
+          qualityOptions={qualityOptions}
+          isPlaying={isPlaying}
+          isVideo={true}
+        />
       </div>
     </div>
   );

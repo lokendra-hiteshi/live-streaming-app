@@ -1,10 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
+import { useNavigate } from "react-router-dom";
+import paths from "../paths";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isLogedIn = localStorage.getItem("authToken");
+    if (isLogedIn) {
+      navigate(paths.home);
+    }
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -14,8 +24,8 @@ const Login = () => {
   };
 
   return (
-    <section className="bg-gray-50 dark:bg-gray-900">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+    <section className="relative bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 px-6  lg:px-8 min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 w-full">
         <a
           href="#"
           className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
@@ -38,7 +48,7 @@ const Login = () => {
                   htmlFor="email"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Your email
+                  Your Email
                 </label>
                 <input
                   type="email"
